@@ -4,8 +4,6 @@ __pycache__/
 *.pyc
 
 # Data & Models (We will use DVC for these later)
-data/raw/
-data/processed/
 models/
 
 # Tracking Logs & Telemetry

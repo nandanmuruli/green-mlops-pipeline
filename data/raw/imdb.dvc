@@ -1,0 +1,6 @@
+outs:
+- md5: bfa504d307d6657e2dfbb2e7e439ab3e.dir
+  size: 133217064
+  nfiles: 10
+  hash: md5
+  path: imdb
