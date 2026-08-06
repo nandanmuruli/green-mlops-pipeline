@@ -1,0 +1,14 @@
+# Python & Environment
+.venv/
+__pycache__/
+*.pyc
+
+# Data & Models (We will use DVC for these later)
+data/raw/
+data/processed/
+models/
+
+# Tracking Logs & Telemetry
+logs/
+mlruns/
+emissions.csv
