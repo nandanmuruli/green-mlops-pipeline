@@ -11,8 +11,10 @@ class GreenTracker:
             project_name=project_name,
             output_dir="./logs",
             output_file="emissions.csv",
-            log_level="error" # This keeps your terminal output clean
+            log_level="error",
+            measure_power_secs=1
         )
+        
 
     def __enter__(self):
         self.tracker.start()
