@@ -1,0 +1,55 @@
+# Green MLOps pipeline configuration
+# Central place for dataset, model, training and experiment parameters
+# so runs are reproducible and not hardcoded across scripts.
+
+dataset:
+  name: stanfordnlp/imdb
+  raw_dir: ./data/raw/imdb
+  train_subset_size: 500
+  eval_subset_size: 100
+  max_seq_length: 128
+  seed: 42
+
+model:
+  base_model: ./models/pretrained/distilbert-base-uncased  # local copy (HF hub is not reachable from the execution sandbox)
+  num_labels: 2
+
+training:
+  output_dir: ./models/baseline
+  learning_rate: 2.0e-5
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 8
+  num_train_epochs: 2
+  logging_steps: 10
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment_name: Green_MLOps_Baseline
+
+telemetry:
+  log_dir: ./logs
+  emissions_file: emissions.csv
+  measure_power_secs: 1
+
+# RQ2: model compression trade-off study (post-training, applied to the
+# trained baseline checkpoint rather than retraining from scratch)
+compression:
+  baseline_checkpoint: ./models/baseline/checkpoint-126
+  quantized_output_dir: ./models/quantized
+  pruned_output_dir: ./models/pruned
+  pruning_amount: 0.3          # fraction of weights pruned (L1 unstructured)
+  results_file: ./results/rq2_compression_results.csv
+
+# RQ3: scheduling (early-stopping vs brute-force grid search) and
+# hardware-capping (CPU-thread cap as a proxy for GPU power capping,
+# since this project runs on Apple Silicon / a CPU-only Linux sandbox
+# with no NVIDIA GPU and no Intel RAPL / Scaphandre support available)
+rq3:
+  sla_latency_ms: 500          # max acceptable inference latency per batch
+  thread_caps: [1, 2, 4]       # torch.set_num_threads variants to benchmark
+  grid_search:
+    learning_rates: [5.0e-5, 2.0e-5]
+    batch_sizes: [8, 16]
+  early_stopping:
+    patience: 1
+  results_file: ./results/rq3_results.csv

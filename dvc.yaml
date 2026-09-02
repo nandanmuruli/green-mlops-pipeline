@@ -1,0 +1,53 @@
+stages:
+  ingest:
+    cmd: python -m src.pipeline.ingest_data
+    deps:
+      - src/pipeline/ingest_data.py
+    # data/raw/imdb is already DVC-tracked via `dvc add` (data/raw/imdb.dvc);
+    # this stage is kept idempotent (skips download if the folder exists)
+    # so it can still be run for reproducibility without a tracking clash.
+
+  train_baseline:
+    cmd: python -m src.pipeline.train_model
+    deps:
+      - data/raw/imdb
+      - src/pipeline/train_model.py
+      - src/telemetry/energy_tracker.py
+      - configs/config.yaml
+    outs:
+      - models/baseline
+    metrics:
+      - logs/emissions.csv:
+          cache: false
+
+  compress:
+    cmd: python -m src.pipeline.compress
+    deps:
+      - models/baseline
+      - src/pipeline/compress.py
+      - src/pipeline/evaluate.py
+    outs:
+      - models/quantized
+      - models/pruned
+    metrics:
+      - results/rq2_compression_results.csv:
+          cache: false
+
+  rq3_experiments:
+    cmd: python -m src.pipeline.rq3_experiments
+    deps:
+      - models/baseline
+      - src/pipeline/rq3_experiments.py
+    metrics:
+      - results/rq3_results.csv:
+          cache: false
+
+  dashboard:
+    cmd: python -m src.dashboard.build_dashboard
+    deps:
+      - results/rq2_compression_results.csv
+      - results/rq3_results.csv
+      - logs/emissions.csv
+      - src/dashboard/build_dashboard.py
+    outs:
+      - reports/dashboard.html
