@@ -39,6 +39,13 @@ compression:
   pruned_output_dir: ./models/pruned
   pruning_amount: 0.3          # fraction of weights pruned (L1 unstructured)
   results_file: ./results/rq2_compression_results.csv
+  # Larger-than-training-default eval subset + a pinned thread count make
+  # this benchmark reproducible across machines: with only 100 examples,
+  # CPU floating-point rounding differences (which vary with the host's
+  # thread count) were enough to flip a handful of predictions and move
+  # accuracy by several points between runs.
+  eval_subset_size: 300
+  eval_num_threads: 4
 
 # RQ3: scheduling (early-stopping vs brute-force grid search) and
 # hardware-capping (CPU-thread cap as a proxy for GPU power capping,

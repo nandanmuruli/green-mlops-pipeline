@@ -1,1 +1,0 @@
-{"run_tag": "lr5e-05_bs8_grid", "strategy": "grid_search", "learning_rate": 5e-05, "batch_size": 8, "epochs_run": 1.0, "train_duration_s": 33.392, "eval_loss": 0.7034, "emissions_kg_co2e": 2.7655047430659402e-06}

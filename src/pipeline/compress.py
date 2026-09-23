@@ -93,7 +93,12 @@ def run():
         print(f"\n--- Evaluating variant: {variant_name} ---")
         with mlflow.start_run(run_name=f"rq2_{variant_name}_eval"):
             with GreenTracker(project_name=f"rq2_{variant_name}_eval"):
-                metrics = evaluate_model(model, tokenizer=tokenizer, cfg=cfg)
+                metrics = evaluate_model(
+                    model, tokenizer=tokenizer, cfg=cfg,
+                    num_threads=ccfg.get("eval_num_threads"),
+                    eval_subset_size=ccfg.get("eval_subset_size"),
+                    deterministic=True,
+                )
             metrics["variant"] = variant_name
             metrics["model_size_mb"] = round(size_mb, 3)
             for k, v in metrics.items():

@@ -1,5 +1,9 @@
 import os
-from datasets import load_from_disk
+from datasets import load_from_disk, disable_caching as _disable_hf_datasets_caching
+
+# Avoid polluting the DVC-tracked data/raw/imdb dir with cache-*.arrow
+# byproduct files from .shuffle()/.select()/.map() (see evaluate.py).
+_disable_hf_datasets_caching()
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
 import mlflow
 from src.telemetry.energy_tracker import GreenTracker

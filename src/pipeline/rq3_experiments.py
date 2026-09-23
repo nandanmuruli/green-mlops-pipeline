@@ -244,13 +244,18 @@ def run(max_new_runs=None):
     else:
         print("[skip] capping benchmark already completed")
 
+    scheduling_csv_path = os.path.join("results", "rq3_scheduling_results.csv")
+    if os.path.exists(scheduling_csv_path) and not os.path.exists(PARTIAL_PATH):
+        print("[skip] scheduling benchmark already completed")
+        return True
+
     scheduling_rows, scheduling_summary = run_scheduling_benchmark(cfg, max_new_runs=max_new_runs)
     if scheduling_rows is None:
         print("Scheduling benchmark not yet complete -- re-run this stage to continue.")
         return False
 
     import csv
-    with open(os.path.join("results", "rq3_scheduling_results.csv"), "w", newline="") as f:
+    with open(scheduling_csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(scheduling_rows[0].keys()))
         writer.writeheader()
         writer.writerows(scheduling_rows)
@@ -271,8 +276,11 @@ def run(max_new_runs=None):
         f.write(f"\n== summary ==\n{scheduling_summary}\n")
 
     partial_path = os.path.join("results", "rq3_scheduling_partial.jsonl")
-    if os.path.exists(partial_path):
-        os.remove(partial_path)
+    try:
+        if os.path.exists(partial_path):
+            os.remove(partial_path)
+    except OSError:
+        pass  # best-effort cleanup only; the sandbox filesystem may not permit deletes
     shutil.rmtree(SCRATCH_DIR, ignore_errors=True)
     print(f"\nRQ3 results written to results/rq3_capping_results.csv, results/rq3_scheduling_results.csv, {cfg['rq3']['results_file']}")
     return True

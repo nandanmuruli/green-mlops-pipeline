@@ -1,0 +1,111 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m src.pipeline.ingest_data
+    deps:
+    - path: src/pipeline/ingest_data.py
+      hash: md5
+      md5: d7c6680cf487231e7042a055bd62b543
+      size: 706
+  train_baseline:
+    cmd: python -m src.pipeline.train_model
+    deps:
+    - path: configs/config.yaml
+      hash: md5
+      md5: f320f3f86a8780207c1a5cda0b812c18
+      size: 2198
+    - path: data/raw/imdb
+      hash: md5
+      md5: bfa504d307d6657e2dfbb2e7e439ab3e.dir
+      size: 133217064
+      nfiles: 10
+    - path: src/pipeline/train_model.py
+      hash: md5
+      md5: 2e3c4926be5a542f35fe332ea1bedb71
+      size: 2607
+    - path: src/telemetry/energy_tracker.py
+      hash: md5
+      md5: da43caad8d850c86fbfbbb0270a82789
+      size: 1094
+    outs:
+    - path: logs/emissions.csv
+      hash: md5
+      md5: a5e209253f3347bb917c50d9e89e6b36
+      size: 7749
+    - path: models/baseline
+      hash: md5
+      md5: b7c374c9e8ccebfb07ea69956e623171.dir
+      size: 803582335
+      nfiles: 7
+  compress:
+    cmd: python -m src.pipeline.compress
+    deps:
+    - path: models/baseline
+      hash: md5
+      md5: b7c374c9e8ccebfb07ea69956e623171.dir
+      size: 803582335
+      nfiles: 7
+    - path: src/pipeline/compress.py
+      hash: md5
+      md5: 329739b77004bc5887842c9e33f08188
+      size: 4932
+    - path: src/pipeline/evaluate.py
+      hash: md5
+      md5: a531768293263bce8bd581de226e492f
+      size: 4704
+    outs:
+    - path: models/pruned
+      hash: md5
+      md5: cae7e8056ac72b94eb3d28cd257ef71e.dir
+      size: 267853258
+      nfiles: 1
+    - path: models/quantized
+      hash: md5
+      md5: 8345740ee97d364e0e802cf26061c561.dir
+      size: 138707162
+      nfiles: 1
+    - path: results/rq2_compression_results.csv
+      hash: md5
+      md5: dfa47a7bb8e21e4b6fc2a2eb80285b6c
+      size: 399
+  rq3_experiments:
+    cmd: python -m src.pipeline.rq3_experiments
+    deps:
+    - path: models/baseline
+      hash: md5
+      md5: b7c374c9e8ccebfb07ea69956e623171.dir
+      size: 803582335
+      nfiles: 7
+    - path: src/pipeline/rq3_experiments.py
+      hash: md5
+      md5: faeecf1a48c8c6ef16cb4cb16cbe8939
+      size: 11984
+    outs:
+    - path: results/rq3_results.csv
+      hash: md5
+      md5: 3b586534816ba56129b3f225e85fdd51
+      size: 1066
+  dashboard:
+    cmd: python -m src.dashboard.build_dashboard
+    deps:
+    - path: logs/emissions.csv
+      hash: md5
+      md5: a5e209253f3347bb917c50d9e89e6b36
+      size: 7749
+    - path: results/rq2_compression_results.csv
+      hash: md5
+      md5: dfa47a7bb8e21e4b6fc2a2eb80285b6c
+      size: 399
+    - path: results/rq3_results.csv
+      hash: md5
+      md5: 3b586534816ba56129b3f225e85fdd51
+      size: 1066
+    - path: src/dashboard/build_dashboard.py
+      hash: md5
+      md5: 1cd1f532f4f18c72e9b61f0ae42bc7dd
+      size: 7576
+    outs:
+    - path: reports/dashboard.html
+      hash: md5
+      md5: 701a6e16576327b3f49f0c0eabb80b67
+      size: 163992
